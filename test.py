@@ -10,8 +10,10 @@ def cal_target(ticker,k):
     target= today['open']+yesterday_range*k
     return target
 
-access="truPjute8McA5dL6lxPaLITpEqCkiedA69U3IpVP"
-secret="xuyCLfU2zbhcAFO7wcHnxINZMr9SSnGxnrvmpxXC"
+f=open("key.txt")
+lines=f.readlines()
+access=lines[0]
+secret=lines[1]
 upbit = pyupbit.Upbit(access, secret)
 
 target=cal_target("KRW-BTC",0.5)
@@ -47,6 +49,3 @@ while True:
    
    
    time.sleep(1)
-   
-       
-       
