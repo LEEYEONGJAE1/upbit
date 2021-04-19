@@ -1,3 +1,4 @@
+
 import pyupbit
 import time
 import datetime
@@ -33,4 +34,3 @@ while True:
             upbit.sell_market_order(name,upbit.get_balance(name)) # 전량 매도     
         time.sleep(0.2)
         
-    time.sleep(1)
