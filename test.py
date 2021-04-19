@@ -1,51 +1,36 @@
 import pyupbit
 import time
 import datetime
-
-def cal_target(ticker,k):
-    df = pyupbit.get_ohlcv(ticker,"day")
-    yesterday=df.iloc[-2]
-    today=df.iloc[-1]
-    yesterday_range=yesterday['high']-yesterday['low']
-    target= today['open']+yesterday_range*k
-    return target
+import random
 
 f=open("key.txt")
 lines=f.readlines()
-access=lines[0]
-secret=lines[1]
+access=lines[0].strip()
+secret=lines[1].strip()
 upbit = pyupbit.Upbit(access, secret)
 
-target=cal_target("KRW-BTC",0.5)
-op_mode=False
-hold=False
-ticker="KRW-BTC"
-k=0.5
+entire_ticker=pyupbit.get_tickers()
 
 while True:
-   now=datetime.datetime.now()
-   price=pyupbit.get_current_price(ticker)
-   
-   if now.hour == 9 and now.minute == 0 and 20 <= now.second <= 30:
-       target=cal_target(ticker,k)
-       time.sleep(10)
-       op_mode=True
-       
-       
-   if op_mode is True and price is not None and price>=target and hold is False:
-       krw_balance=upbit.get_balance("KRW")
-       upbit.buy_market_order(ticker,krw_balance)
-       hold=True
-       
-   if now.hour==8 and now.minute== 59 and (50<=now.second<=59):
-       if op_mode is True and hold is True:
-           btc_balance = upbit.get_balance(ticker)
-           upbit.sell_market_order(ticker,btc_balance)
-           hold=False
-       op_mode=False
-       time.sleep(10)
-       
-   print(f"현재시간: {now} 목표가: {target} 현재가: {price} 보유상태: {hold} 동작상태: {op_mode}")    
-   
-   
-   time.sleep(1)
+    while upbit.get_balance("KRW")>=5000:
+        ticker=random.choice(entire_ticker)
+        if ticker[0]=='B'or ticker[0]=='U':
+            continue
+        print(ticker)
+        upbit.buy_market_order(ticker, 5000)
+        time.sleep(0.1)
+        
+    MY=upbit.get_balances()
+    print(MY)
+    for ticker in MY:
+        name=ticker['currency']
+        _avg=float(ticker['avg_buy_price'])
+        if name=='KRW':
+            continue
+        name="KRW-"+name
+        print(name,upbit.get_balance(name))
+        if (pyupbit.get_current_price(name)>=1.005*_avg) or  (pyupbit.get_current_price(name)<=0.95*_avg) :
+            upbit.sell_market_order(name,upbit.get_balance(name)) # 전량 매도     
+        time.sleep(0.2)
+        
+    time.sleep(1)
